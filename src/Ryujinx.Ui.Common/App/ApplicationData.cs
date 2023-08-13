@@ -31,6 +31,7 @@ namespace Ryujinx.Ui.App.Common
         public string FileSize { get; set; }
         public double FileSizeBytes { get; set; }
         public string Path { get; set; }
+        [JsonIgnore]
         public BlitStruct<ApplicationControlProperty> ControlHolder { get; set; }
 
         [JsonIgnore]

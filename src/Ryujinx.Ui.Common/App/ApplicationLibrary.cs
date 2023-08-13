@@ -16,6 +16,7 @@ using Ryujinx.HLE.HOS.SystemState;
 using Ryujinx.HLE.Loaders.Npdm;
 using Ryujinx.Ui.Common.Configuration;
 using Ryujinx.Ui.Common.Configuration.System;
+using Ryujinx.Ui.Common.Helper;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -93,6 +94,37 @@ namespace Ryujinx.Ui.App.Common
 
             // Builds the applications list with paths to found applications
             List<string> applications = new();
+
+            var loadedApps = new List<ApplicationData>();
+            loadedApps.LoadCache();
+            var appsLoaded = loadedApps.Count;
+
+            // Just load from cache
+            if (appsLoaded > 0)
+            {
+
+                foreach (var data in loadedApps)
+                {
+                    OnApplicationAdded(new ApplicationAddedEventArgs
+                    {
+                        AppData = data,
+                    });
+
+                    OnApplicationCountUpdated(new ApplicationCountUpdatedEventArgs
+                    {
+                        NumAppsFound = appsLoaded,
+                        NumAppsLoaded = appsLoaded,
+                    });
+                }
+                OnApplicationCountUpdated(new ApplicationCountUpdatedEventArgs
+                {
+                    NumAppsFound = appsLoaded,
+                    NumAppsLoaded = appsLoaded,
+                });
+                _cancellationToken.Dispose();
+                _cancellationToken = null;
+                return;
+            }
 
             try
             {
@@ -475,6 +507,8 @@ namespace Ryujinx.Ui.App.Common
                         NumAppsFound = numApplicationsFound,
                         NumAppsLoaded = numApplicationsLoaded,
                     });
+
+                    loadedApps.Add(data);
                 }
 
                 OnApplicationCountUpdated(new ApplicationCountUpdatedEventArgs
@@ -487,6 +521,7 @@ namespace Ryujinx.Ui.App.Common
             {
                 _cancellationToken.Dispose();
                 _cancellationToken = null;
+                loadedApps.SaveCache();
             }
         }
 
